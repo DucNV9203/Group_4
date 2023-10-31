@@ -101,18 +101,21 @@ public class SignUpController extends HttpServlet {
                 AccountDAO accDao = new AccountDAO();
 
                 if (accDao.isUserExist(username)) {
-                    request.setAttribute("error", "Username Has Already Existed!");
+                    request.getSession().setAttribute("error", "Username Has Already Existed!");
                     request.getRequestDispatcher("/signup.jsp").forward(request, response);
 
+                } if (accDao.isEmailExist(email)) {
+                    request.getSession().setAttribute("error", "Email Has Already Existed!");
+                    request.getRequestDispatcher("/signup.jsp").forward(request, response);
                 } else {
                     accDAO.signUp(null, username, password, email, firstName, lastName, null, birthday, 0);
+                    request.getSession().setAttribute("success", "Sign up successfully");
                     response.sendRedirect("/Login");
                 }
             } catch (Exception e) {
                 // TODO: handle exception
             }
         }
-
     }
 
     /**

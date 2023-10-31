@@ -87,9 +87,9 @@ public class LoginController extends HttpServlet {
                 request.getSession().setAttribute("error", "Username or Password is incorrect!");
                 request.getRequestDispatcher("./login.jsp").forward(request, response);
             } else if (accDao.checkUserExit(username, password) == 0) {
-                Cookie c = new Cookie("username", username);
-                c.setMaxAge(60 * 60);
-                response.addCookie(c);
+//                Cookie c = new Cookie("username", username);
+//                c.setMaxAge(60 * 60);
+//                response.addCookie(c);
  
 //                System.out.println("Cookie: " + c.getValue());
                 request.getSession().setAttribute("success", "Login success");

@@ -68,8 +68,11 @@
                         <span>Have an account already?</span>
                         <a href="/Login"> Please login here</a>
                     </div>
-                    <p id="message"></p>
-                </form>                
+                </form> 
+                    <div id="signupError">
+                        <p id="message"></p>
+                    </div>
+                
             </div>
             <script>
                 // Đợi 5 giây trước khi xóa div
@@ -77,6 +80,54 @@
                     var messageDiv = document.getElementById('message');
                     messageDiv.parentNode.removeChild(messageDiv);
                 }, 5000);
+                
+                //#########################################################
+                //Validate user's input
+                let error = document.getElementById("signupError");
+                let form = document.getElementById("signUpForm");
+
+                form.addEventListener("submit", function (event) {
+                    let msg = "";
+                    let error_msg = document.getElementById("message");
+                    let username = document.getElementById("username").value;
+                    let email = document.getElementById("email").value;
+                    let password = document.getElementById("password").value;
+                    let valid = true;
+                    if (username === "" || username === null) {
+                        msg += "Username is empty" + "<br>";
+                        // error.classList.add("error_show");
+                        valid = false;
+                    } else if (username.length > 32) {
+                        msg += "Username is too long" + "<br>";
+                        // error.classList.add("error_show");
+                        valid = false;
+                    }
+                    const emailInput = document.getElementById('email');
+                    const emailValue = emailInput.value;
+
+                    const emailRegex = /^(?=.{11,64}@)[A-Za-z0-9]+((@gmail.com))+$/;
+                    if (email === "" || email === null) {
+                        msg += "Email is empty" + "<br>";
+                        // error.classList.add("error_show");
+                        valid = false;
+                    } else
+                    if (!emailRegex.test(emailValue)) {
+                        // Invalid email address
+                        msg += "Invalid email address" + "<br>";
+                        valid = false;
+                    }
+
+                    if (password.length < 8) {
+                        msg += "Password must be more than 8 characters" + "<br>";
+                        valid = false;
+                    }
+                    if (valid == false) {
+                        error.classList.add("error_show");
+                        error_msg.innerHTML = msg.substring(0, msg.length);
+                        event.preventDefault();
+                    }
+                });
+                //#########################################################
             </script>
         </div>
 

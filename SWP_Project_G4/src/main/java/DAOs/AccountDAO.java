@@ -43,6 +43,23 @@ public class AccountDAO {
         }
         return ok;
     }
+    public boolean isEmailExist(String email) {
+        boolean ok = false;
+        try {
+            statement = conn.prepareStatement("select email from Account where email = ?");
+            statement.setString(1, email);
+            ResultSet resultSet = statement.executeQuery();
+            
+            if(resultSet.next()) {
+                if(resultSet.getString("email").equals(email)) {
+                    ok = true;
+                }
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return ok;
+    }
 
     public int checkUserExit(String username, String password) {
         int status = -1;
@@ -74,6 +91,32 @@ public class AccountDAO {
         // return resutl
         return status;
     }
+    public int checkAdminExist(String username, String password) {
+        int status = -1;
+        try {
+            statement = conn.prepareStatement("select password from [Admin] where username = ?");
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            
+            //not exist
+            if(!resultSet.next()) {
+                status = 1;
+            } else {
+                String pw = resultSet.getString("password");
+                
+                if(pw.equals(password)) {
+                    //correct
+                    status = 0;
+                } else {
+                    //incorrect pass
+                    status = 2;
+                }
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(AccountDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return status;
+    }
 
     public void signUp(String avatar,
             String username,
@@ -100,6 +143,15 @@ public class AccountDAO {
             statement.executeUpdate();
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+    public static void main(String[] args) throws Exception {
+        AccountDAO acc = new AccountDAO();
+        boolean check = acc.isEmailExist("ducnv9203@gmail.com");
+        if (check) {
+            System.out.println("True");
+        } else {
+            System.out.println("False");
         }
     }
 }
