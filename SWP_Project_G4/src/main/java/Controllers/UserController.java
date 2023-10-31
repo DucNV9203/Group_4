@@ -4,12 +4,21 @@
  */
 package Controllers;
 
+import DAOs.AccountDAO;
+import DAOs.ProductDAO;
+import Models.Account;
+import Models.Products;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,7 +43,7 @@ public class UserController extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet UserController</title>");            
+            out.println("<title>Servlet UserController</title>");
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>Servlet UserController at " + request.getContextPath() + "</h1>");
@@ -55,7 +64,52 @@ public class UserController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        // processRequest(request, response);
+        String path = request.getRequestURI();
+        if (path.endsWith("/UserController/userHome")) {
+            request.getRequestDispatcher("/home.jsp").forward(request, response);
+        } else {
+            if (path.startsWith("/UserController/UserProfile")) {
+                try {
+                    String[] data = path.split("/");
+                    int id = Integer.parseInt(data[data.length - 1]);
+                    AccountDAO dao = new AccountDAO();
+                    Account acc = dao.GetAccount(id);
+                    if (acc == null) {
+                        response.sendRedirect("/UserController/userHome");
+                    } else {
+                        HttpSession session = request.getSession();
+                        session.setAttribute("userInformation", acc);
+                        request.getRequestDispatcher("/userProfile.jsp").forward(request, response);
+                    }
+                } catch (SQLException | ClassNotFoundException ex) {
+                    Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (path.startsWith("/UserController/ProductDetail")) {
+            try {
+                String[] data = path.split("/");
+                int id = Integer.parseInt(data[data.length - 1]);
+                ProductDAO dao = new ProductDAO();
+                Products pr = dao.getProduct(id);
+                if (pr == null) {
+                    response.sendRedirect("/UserController/userHome");
+                } else {
+                    HttpSession session = (HttpSession) request.getSession();
+                    session.setAttribute("productInformation", pr);
+                    request.getRequestDispatcher("/product-detail.jsp").forward(request, response);
+                }
+            } catch (SQLException | ClassNotFoundException ex) {
+                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        }
+        //========================================================================================
+        
     }
 
     /**
@@ -69,7 +123,60 @@ public class UserController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        //  processRequest(request, response);
+        if (request.getParameter("btnUpdateUser") != null && !request.getParameter("btnUpdateUser").equals("Submit")) {
+            try {
+                int id = Integer.parseInt(request.getParameter("ID"));
+                String avatar = request.getParameter("Avatar");
+                String username = request.getParameter("Username");
+                String password = request.getParameter("Password");
+                String email = request.getParameter("Email");
+                String firstName = request.getParameter("FirstName");
+                String lastName = request.getParameter("LastName");
+                String gender = request.getParameter("Gender");
+                Date birthday = Date.valueOf(request.getParameter("Birthday"));
+                int role = Integer.parseInt(request.getParameter("Role"));
+                Account acc = new Account(id, avatar, username, password, email, firstName, lastName, gender, birthday, role);
+                AccountDAO dao = new AccountDAO();
+                int ketqua = dao.UpdateAccount(acc);
+                if (ketqua == 0) {
+                    response.sendRedirect("/UserController/UserProfile");
+                } else {
+                    response.sendRedirect("UserController/userHome");
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        //===================================================================================
+        if (request.getParameter("btnAddToCart") != null && !request.getParameter("btnAddToCart").equals("AddToCart")) {
+            try {
+
+                String image = request.getParameter("Image");
+                String productName = request.getParameter("ProductName");
+                int price = Integer.parseInt(request.getParameter("Price"));
+                String description = request.getParameter("Description");
+              
+                Products pr = new Products(image,productName,price,description);
+                ProductDAO dao = new ProductDAO();
+                int ketqua = dao.UpdateProduct(pr);
+                if (ketqua == 0) {
+                    response.sendRedirect("/UserController/UserProfile");
+                } else {
+                    response.sendRedirect("UserController/userHome");
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(AdminController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(UserController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
@@ -81,5 +188,4 @@ public class UserController extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
 }
